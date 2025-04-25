@@ -72,6 +72,9 @@ const (
 	LightClientFinalityUpdateTopic = "light_client_finality_update"
 	// LightClientOptimisticUpdateTopic represents a new light client optimistic update event topic.
 	LightClientOptimisticUpdateTopic = "light_client_optimistic_update"
+
+	// Debugging encpoints
+	DebugEventGetBlobsV1Requests = "debug_get_blobs_v1_request"
 )
 
 var (
@@ -117,8 +120,13 @@ var stateFeedEventTopics = map[feed.EventType]string{
 	statefeed.PayloadAttributes:           PayloadAttributesTopic,
 }
 
+var debugOpEventTopics = map[feed.EventType]string{
+	fdebug.EngineAPIGetBlobsResponse: DebugEventGetBlobsV1Requests,
+}
+
 var topicsForStateFeed = topicsForFeed(stateFeedEventTopics)
 var topicsForOpsFeed = topicsForFeed(opsFeedEventTopics)
+var topicsForDebugOpEventFeed = topicsForFeed(debugOpEventTopics)
 
 func topicsForFeed(em map[feed.EventType]string) map[string]bool {
 	topics := make(map[string]bool, len(em))
@@ -132,6 +140,7 @@ type topicRequest struct {
 	topics        map[string]bool
 	needStateFeed bool
 	needOpsFeed   bool
+	needDebugFeed bool
 }
 
 func (req *topicRequest) requested(topic string) bool {
@@ -145,12 +154,14 @@ func newTopicRequest(topics []string) (*topicRequest, error) {
 			req.needStateFeed = true
 		} else if topicsForOpsFeed[name] {
 			req.needOpsFeed = true
+		} else if topicsForDebugOpEventFeed[name] {
+			req.needDebugFeed = true
 		} else {
 			return nil, errors.Wrap(errInvalidTopicName, name)
 		}
 		req.topics[name] = true
 	}
-	if len(req.topics) == 0 || (!req.needStateFeed && !req.needOpsFeed) {
+	if len(req.topics) == 0 || (!req.needStateFeed && !req.needOpsFeed && !req.needDebugFeed) {
 		return nil, errNoValidTopics
 	}
 
@@ -178,6 +189,7 @@ func (s *Server) StreamEvents(w http.ResponseWriter, r *http.Request) {
 		httputil.HandleError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	fmt.Println("new event stream ->", r.URL.Query()["topics"])
 
 	timeout := s.EventWriteTimeout
 	if timeout == 0 {
@@ -200,11 +212,11 @@ func (s *Server) StreamEvents(w http.ResponseWriter, r *http.Request) {
 
 	go es.outboxWriteLoop(ctx, cancel, sw, r.URL.Path)
 	if err := es.recvEventLoop(ctx, cancel, topics, s); err != nil {
-		log.WithError(err).Debug("Shutting down StreamEvents handler.")
+		log.WithError(err).Error("Shutting down StreamEvents handler.")
 	}
 	cleanupStart := time.Now()
 	es.waitForExit()
-	log.WithField("cleanup_wait", time.Since(cleanupStart)).Debug("streamEvents shutdown complete")
+	log.WithField("cleanup_wait", time.Since(cleanupStart)).Error("streamEvents shutdown complete")
 }
 
 func newEventStreamer(buffSize int, ka time.Duration) *eventStreamer {
@@ -232,6 +244,10 @@ func (es *eventStreamer) recvEventLoop(ctx context.Context, cancel context.Cance
 	if req.needStateFeed {
 		stateSub := s.StateNotifier.StateFeed().Subscribe(eventsChan)
 		defer stateSub.Unsubscribe()
+	}
+	if req.needDebugFeed {
+		debugSub := s.DebugOpNotifier.DebugEventFeed().Subscribe(eventsChan)
+		defer debugSub.Unsubscribe()
 	}
 	for {
 		select {
@@ -292,7 +308,7 @@ func (es *eventStreamer) outboxWriteLoop(ctx context.Context, cancel context.Can
 	var err error
 	defer func() {
 		if err != nil {
-			log.WithError(err).Debug("Event streamer shutting down due to error.")
+			log.WithError(err).Error("Event streamer shutting down due to error.")
 			httpSSEErrorCount.WithLabelValues(endpoint, err.Error()).Inc()
 		}
 		es.exit()
@@ -427,6 +443,7 @@ func jsonMarshalReader(name string, v any) io.Reader {
 
 func topicForEvent(event *feed.Event) string {
 	switch event.Data.(type) {
+	// Standard beacon API
 	case *operation.AggregatedAttReceivedData:
 		return AttestationTopic
 	case *operation.UnAggregatedAttReceivedData:
@@ -461,6 +478,9 @@ func topicForEvent(event *feed.Event) string {
 		return BlockTopic
 	case payloadattribute.EventData:
 		return PayloadAttributesTopic
+	// Debugging events
+	case *fdebug.EngineAPIGetBlobsResponseData:
+		return DebugEventGetBlobsV1Requests
 	default:
 		return InvalidTopic
 	}
@@ -619,6 +639,11 @@ func (s *Server) lazyReaderForEvent(ctx context.Context, event *feed.Event, topi
 				ExecutionOptimistic: v.Optimistic,
 			}
 			return jsonMarshalReader(eventName, blk)
+		}, nil
+	// DEBUGGING EVENTS
+	case *fdebug.EngineAPIGetBlobsResponseData:
+		return func() io.Reader {
+			return jsonMarshalReader(eventName, structs.EngineAPIGetBlobsV1FromResponse(v))
 		}, nil
 	default:
 		return nil, errors.Wrapf(errUnhandledEventData, "event data type %T unsupported", v)

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/OffchainLabs/prysm/v6/async/event"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/cache"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/cache/depositsnapshot"
 	statefeed "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/state"
@@ -160,6 +161,7 @@ type Service struct {
 	verifierWaiter          *verification.InitializerWaiter
 	blobVerifier            verification.NewBlobVerifier
 	capabilityCache         *capabilityCache
+	debugOpNotifier         event.SubscriberSender
 }
 
 // NewService sets up a new instance with an ethclient when given a web3 endpoint as a string in the config.

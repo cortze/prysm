@@ -8,6 +8,7 @@ import (
 
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/blockchain"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/cache"
+	"github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/debug"
 	opfeed "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/operation"
 	statefeed "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/state"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/state/stategen"
@@ -18,6 +19,7 @@ import (
 type Server struct {
 	StateNotifier          statefeed.Notifier
 	OperationNotifier      opfeed.Notifier
+	DebugOpNotifier        debug.Notifier
 	HeadFetcher            blockchain.HeadFetcher
 	ChainInfoFetcher       blockchain.ChainInfoFetcher
 	TrackedValidatorsCache *cache.TrackedValidatorsCache

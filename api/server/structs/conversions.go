@@ -18,6 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
+	"github.com/prysmaticlabs/prysm/v6/beacon-chain/core/feed/debug"
 )
 
 var errNilValue = errors.New("nil value")
@@ -1575,5 +1576,17 @@ func SyncAggregateFromConsensus(sa *eth.SyncAggregate) *SyncAggregate {
 	return &SyncAggregate{
 		SyncCommitteeBits:      hexutil.Encode(sa.SyncCommitteeBits),
 		SyncCommitteeSignature: hexutil.Encode(sa.SyncCommitteeSignature),
+	}
+}
+
+func EngineAPIGetBlobsV1FromResponse(resp *debug.EngineAPIGetBlobsResponseData) *EngineAPIGetBlobsResponseData {
+	return &EngineAPIGetBlobsResponseData{
+		Timestamp:           resp.Timestamp,
+		ReqDuration:         resp.ReqDuration,
+		ValDuration:         resp.ValDuration,
+		ReconstructDuration: resp.ReconstructDuration,
+		Request:             resp.Request,
+		Response:            resp.Response,
+		SuccessArray:        resp.SuccessArray,
 	}
 }
