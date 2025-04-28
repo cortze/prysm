@@ -14,6 +14,7 @@ import (
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/cache"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/cache/depositsnapshot"
 	blockfeed "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/block"
+	fdebug "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/debug"
 	opfeed "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/operation"
 	statefeed "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/state"
 	lightClient "github.com/OffchainLabs/prysm/v6/beacon-chain/core/light-client"
@@ -72,7 +73,6 @@ type Service struct {
 
 // Config options for the beacon node RPC server.
 type Config struct {
-<<<<<<< HEAD
 	ExecutionReconstructor    execution.Reconstructor
 	Host                      string
 	Port                      string
@@ -113,6 +113,7 @@ type Config struct {
 	StateNotifier             statefeed.Notifier
 	BlockNotifier             blockfeed.Notifier
 	OperationNotifier         opfeed.Notifier
+	DebugOpNotifier           fdebug.Notifier
 	StateGen                  *stategen.State
 	MaxMsgSize                int
 	ExecutionEngineCaller     execution.EngineCaller
@@ -124,60 +125,6 @@ type Config struct {
 	TrackedValidatorsCache    *cache.TrackedValidatorsCache
 	PayloadIDCache            *cache.PayloadIDCache
 	LCStore                   *lightClient.Store
-=======
-	ExecutionReconstructor          execution.Reconstructor
-	Host                            string
-	Port                            string
-	CertFlag                        string
-	KeyFlag                         string
-	BeaconMonitoringHost            string
-	BeaconMonitoringPort            int
-	BeaconDB                        db.HeadAccessDatabase
-	ChainInfoFetcher                blockchain.ChainInfoFetcher
-	HeadFetcher                     blockchain.HeadFetcher
-	CanonicalFetcher                blockchain.CanonicalFetcher
-	ForkFetcher                     blockchain.ForkFetcher
-	ForkchoiceFetcher               blockchain.ForkchoiceFetcher
-	FinalizationFetcher             blockchain.FinalizationFetcher
-	AttestationReceiver             blockchain.AttestationReceiver
-	BlockReceiver                   blockchain.BlockReceiver
-	BlobReceiver                    blockchain.BlobReceiver
-	ExecutionChainService           execution.Chain
-	ChainStartFetcher               execution.ChainStartFetcher
-	ExecutionChainInfoFetcher       execution.ChainInfoFetcher
-	GenesisTimeFetcher              blockchain.TimeFetcher
-	GenesisFetcher                  blockchain.GenesisFetcher
-	MockEth1Votes                   bool
-	EnableDebugRPCEndpoints         bool
-	EnableDebugEventStreamEndpoints bool
-	AttestationCache                *cache.AttestationCache
-	AttestationsPool                attestations.Pool
-	ExitPool                        voluntaryexits.PoolManager
-	SlashingsPool                   slashings.PoolManager
-	SyncCommitteeObjectPool         synccommittee.Pool
-	BLSChangesPool                  blstoexec.PoolManager
-	SyncService                     chainSync.Checker
-	Broadcaster                     p2p.Broadcaster
-	PeersFetcher                    p2p.PeersProvider
-	PeerManager                     p2p.PeerManager
-	MetadataProvider                p2p.MetadataProvider
-	DepositFetcher                  cache.DepositFetcher
-	PendingDepositFetcher           depositsnapshot.PendingDepositsFetcher
-	StateNotifier                   statefeed.Notifier
-	BlockNotifier                   blockfeed.Notifier
-	OperationNotifier               opfeed.Notifier
-	DebugOpNotifier                 debug.Notifier
-	StateGen                        *stategen.State
-	MaxMsgSize                      int
-	ExecutionEngineCaller           execution.EngineCaller
-	OptimisticModeFetcher           blockchain.OptimisticModeFetcher
-	BlockBuilder                    builder.BlockBuilder
-	Router                          *http.ServeMux
-	ClockWaiter                     startup.ClockWaiter
-	BlobStorage                     *filesystem.BlobStorage
-	TrackedValidatorsCache          *cache.TrackedValidatorsCache
-	PayloadIDCache                  *cache.PayloadIDCache
->>>>>>> 5a735edf6 (first working prototype)
 }
 
 // NewService instantiates a new RPC service instance that will

@@ -6,7 +6,7 @@ go_library(
         "events.go",
         "notifier.go",
     ],
-    importpath = "github.com/prysmaticlabs/prysm/v5/beacon-chain/core/feed/debug",
+    importpath = "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/debug",
     visibility = ["//visibility:public"],
     deps = [
         "//async/event:go_default_library",

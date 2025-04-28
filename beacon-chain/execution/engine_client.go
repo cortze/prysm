@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed"
+	"github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/debug"
+	fdebug "github.com/OffchainLabs/prysm/v6/beacon-chain/core/feed/debug"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/execution/types"
 	"github.com/OffchainLabs/prysm/v6/beacon-chain/verification"
 	fieldparams "github.com/OffchainLabs/prysm/v6/config/fieldparams"
@@ -28,9 +30,6 @@ import (
 	gethRPC "github.com/ethereum/go-ethereum/rpc"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
-	"github.com/prysmaticlabs/prysm/v5/beacon-chain/execution/types"
-	"github.com/prysmaticlabs/prysm/v6/beacon-chain/core/feed/debug"
-	fdebug "github.com/prysmaticlabs/prysm/v6/beacon-chain/core/feed/debug"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 )
